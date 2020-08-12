@@ -38,9 +38,13 @@ function draw() {
   CTX.fillStyle = colours.characterColour;
   CTX.fill();
 
-  // changing the characters y velocity by gravity and then changing the characters y by the velocity
-  character.y_velocity += gravity;
-  character.y += character.y_velocity;
+  if (character.y + character.radius < floorHeight) {
+    // changing the characters y velocity by gravity and then changing the characters y by the velocity
+    character.y_velocity += gravity;
+    character.y += character.y_velocity;
+  } else {
+    return;
+  }
 
   window.requestAnimationFrame(draw);
 };
