@@ -19,8 +19,30 @@ var character = {
   x: 100,
   y: 100,
   radius: 20,
-  y_velocity: 0
-}
+  yVelocity: 0
+};
+
+var controller = {
+
+    space: false,
+    keyListener: function (event) {
+
+        'use strict';
+        var key_state = (event.type === "keydown") ? true : false;
+
+        switch (event.keyCode) {
+
+        case 32: // keycode for spacebar
+            controller.space = key_state;
+            break;
+
+        }
+    }
+};
+
+
+
+
 
 function draw() {
 
@@ -38,10 +60,14 @@ function draw() {
   CTX.fillStyle = colours.characterColour;
   CTX.fill();
 
+  if (controller.space) {
+    character.yVelocity = -10;
+  }
+
   if (character.y + character.radius < floorHeight) {
     // changing the characters y velocity by gravity and then changing the characters y by the velocity
-    character.y_velocity += gravity;
-    character.y += character.y_velocity;
+    character.yVelocity += gravity;
+    character.y += character.yVelocity;
   } else {
     return;
   }
