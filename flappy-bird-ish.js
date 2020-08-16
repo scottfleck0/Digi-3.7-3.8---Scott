@@ -2,10 +2,11 @@ const CVS = document.getElementById("gameCanvas");
 const CTX = CVS.getContext('2d');
 
 // constant for the height of the floor
-const floorHeight = 3 * (CVS.height / 4);
+const FLOORHEIGHT = 3 * (CVS.height / 4);
 
 // constant for gravity
-const gravity = 0.5;
+const GRAVITY = 0.8;
+const JUMPSTRENGTH = -9;
 
 // variable containing colours
 var colours = {
@@ -23,26 +24,22 @@ var character = {
 };
 
 var controller = {
+  space: false,
 
-    space: false,
-    keyListener: function (event) {
+  keyListener: function(event){
 
-        'use strict';
-        var key_state = (event.type === "keydown") ? true : false;
+    'use strict';
+    var keyState = (event.type === "keydown") ? true : false;
 
-        switch (event.keyCode) {
+    switch (event.keyCode) {
 
-        case 32: // keycode for spacebar
-            controller.space = key_state;
-            break;
+    case 32: // spacebar
+        controller.space = keyState;
+        break;
 
-        }
     }
+  }
 };
-
-
-
-
 
 function draw() {
 
@@ -52,7 +49,7 @@ function draw() {
 
   //drawing the background
   CTX.fillStyle = colours.groundColour;
-  CTX.fillRect(0, floorHeight, CVS.width, CVS.height / 4);
+  CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
 
   // drawing the character
   CTX.beginPath();
@@ -61,18 +58,21 @@ function draw() {
   CTX.fill();
 
   if (controller.space) {
-    character.yVelocity = -10;
+    character.yVelocity = JUMPSTRENGTH;;
   }
 
-  if (character.y + character.radius < floorHeight) {
-    // changing the characters y velocity by gravity and then changing the characters y by the velocity
-    character.yVelocity += gravity;
-    character.y += character.yVelocity;
-  } else {
-    return;
+  character.yVelocity += GRAVITY;// gravity
+  character.y += character.yVelocity;
+
+  // if rectangle is falling below floor line
+  if (character.y + character.radius > FLOORHEIGHT) {
+    character.y = FLOORHEIGHT - character.radius;
+    character.yVelocity = 0;
   }
 
   window.requestAnimationFrame(draw);
 };
 
+window.addEventListener("keydown", controller.keyListener);
+window.addEventListener("keyup", controller.keyListener);
 window.requestAnimationFrame(draw);
