@@ -23,7 +23,7 @@ var colours = {
 var character = {
   x: 100,
   y: 100,
-  radius: 20,
+  radius: 15,
   yVelocity: 0,
   jumping: false
 };
@@ -50,27 +50,17 @@ function makePipe() {
   var pipe = {
     x: CVS.width - 50,
     topY: 100,
-    width: 30,
+    width: 25,
     gapHeight: 100
   }
 
-  pipes.push();
+  pipes.push(pipe);
 };
 
 function draw() {
   // drawing the sky
   CTX.fillStyle = colours.skyColour;
   CTX.fillRect(0, 0, CVS.width, CVS.height);
-
-  //drawing the background
-  CTX.fillStyle = colours.groundColour;
-  CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
-
-  // drawing the character
-  CTX.beginPath();
-  CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
-  CTX.fillStyle = colours.characterColour;
-  CTX.fill();
 
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
@@ -79,7 +69,24 @@ function draw() {
 
     CTX.fillStyle = colours.pipesColour;
     CTX.fillRect(pipes[i].x, pipes[i].topY + pipes[i].gapHeight, pipes[i].width, CVS.height - pipes[i].topY - pipes[i].gapHeight);
+
+    if (pipes[i].x > 0) {
+      pipes[i].x -= 3;
+    } else{
+    pipes[i].x = CVS.width;
+
+    }
   }
+
+  //drawing the ground
+  CTX.fillStyle = colours.groundColour;
+  CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
+
+  // drawing the character
+  CTX.beginPath();
+  CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
+  CTX.fillStyle = colours.characterColour;
+  CTX.fill();
 
 // if the spacebar has been pressed and not released, the character jumps
   if (controller.space && character.jumping === false) {
