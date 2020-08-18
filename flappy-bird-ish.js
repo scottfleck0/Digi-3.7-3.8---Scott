@@ -50,7 +50,7 @@ function makePipe() {
   var pipe = {
     x: CVS.width - 50,
     topY: 100,
-    width: 25,
+    width: 20,
     gapHeight: 100
   }
 
@@ -70,11 +70,10 @@ function draw() {
     CTX.fillStyle = colours.pipesColour;
     CTX.fillRect(pipes[i].x, pipes[i].topY + pipes[i].gapHeight, pipes[i].width, CVS.height - pipes[i].topY - pipes[i].gapHeight);
 
-    if (pipes[i].x > 0) {
+    if (pipes[i].x > -pipes[i].width) {
       pipes[i].x -= 3;
     } else{
     pipes[i].x = CVS.width;
-
     }
   }
 
