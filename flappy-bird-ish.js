@@ -5,8 +5,8 @@ const CTX = CVS.getContext('2d');
 const FLOORHEIGHT = 3 * (CVS.height / 4);
 
 // constant for gravity
-const GRAVITY = 0.8;
-const JUMPSTRENGTH = -9;
+const GRAVITY = 0.35;
+const JUMPSTRENGTH = -6;
 
 // array for the pipes
 var pipes = [];
@@ -28,6 +28,13 @@ var character = {
   jumping: false
 };
 
+const PIPECONSTS = {
+  WIDTH: 20,
+  GAPHEIGHT: 100,
+  MINY: 30,
+  MAXY: FLOORHEIGHT - 100 - 30
+};
+
 var controller = {
   space: false,
 
@@ -46,12 +53,14 @@ var controller = {
   }
 };
 
+function randomValue(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function makePipe() {
   var pipe = {
-    x: CVS.width - 50,
-    topY: 100,
-    width: 20,
-    gapHeight: 100
+    x: CVS.width,
+    topY: randomValue(PIPECONSTS.MINY, PIPECONSTS.MAXY)
   }
 
   pipes.push(pipe);
@@ -65,15 +74,16 @@ function draw() {
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
     CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY, pipes[i].width, - pipes[i].topY);
+    CTX.fillRect(pipes[i].x, pipes[i].topY, PIPECONSTS.WIDTH, - pipes[i].topY);
 
     CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY + pipes[i].gapHeight, pipes[i].width, CVS.height - pipes[i].topY - pipes[i].gapHeight);
+    CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
 
-    if (pipes[i].x > -pipes[i].width) {
+    if (pipes[i].x > - PIPECONSTS.WIDTH) {
       pipes[i].x -= 3;
     } else{
-    pipes[i].x = CVS.width;
+    pipes.shift();
+    makePipe();
     }
   }
 
@@ -93,7 +103,7 @@ function draw() {
     character.jumping = true;
     character.yVelocity = JUMPSTRENGTH;
 
-// else if the spacebar has been release, the character is not jumping anymore
+  // else if the spacebar has been release, the character is not jumping anymore
   } else if(controller.space === false){
 
     character.jumping = false;
@@ -112,6 +122,7 @@ function draw() {
   }
 
   window.requestAnimationFrame(draw);
+
 };
 
 
