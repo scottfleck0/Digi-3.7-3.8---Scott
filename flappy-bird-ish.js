@@ -8,6 +8,9 @@ const FLOORHEIGHT = 3 * (CVS.height / 4);
 const GRAVITY = 0.35;
 const JUMPSTRENGTH = -6;
 
+// variable for collision detection
+var badCollision = false;
+
 // array for the pipes
 var pipes = [];
 
@@ -53,6 +56,19 @@ var controller = {
   }
 };
 
+function collisionDetection() {
+  for (var i = 0; i < pipes.length; i++) {
+
+    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {
+      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) {
+        badCollision = true;
+      }
+    } else {
+      badCollision = false;
+    }
+  }
+}
+
 function randomValue(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -62,7 +78,7 @@ function makePipe() {
     x: CVS.width,
     topY: randomValue(PIPECONSTS.MINY, PIPECONSTS.MAXY)
   }
-
+  // push this new pipe into the pipes array
   pipes.push(pipe);
 };
 
@@ -82,7 +98,9 @@ function draw() {
     if (pipes[i].x > - PIPECONSTS.WIDTH) {
       pipes[i].x -= 3;
     } else{
+    // shift removes the first item in an array, which is the left most pipe
     pipes.shift();
+    // make pipe function to make a new pipe
     makePipe();
     }
   }
@@ -121,8 +139,9 @@ function draw() {
 
   }
 
+  collisionDetection();
+  console.log(badCollision);
   window.requestAnimationFrame(draw);
-
 };
 
 
