@@ -35,7 +35,8 @@ const PIPECONSTS = {
   WIDTH: 20,
   GAPHEIGHT: 100,
   MINY: 30,
-  MAXY: FLOORHEIGHT - 100 - 30
+  MAXY: FLOORHEIGHT - 100 - 30,
+  DISTANCEBETWEEN: CVS.width / 2
 };
 
 var controller = {
@@ -56,6 +57,7 @@ var controller = {
   }
 };
 
+// function for collision detection for the pipes
 function collisionDetection() {
   for (var i = 0; i < pipes.length; i++) {
 
@@ -69,17 +71,19 @@ function collisionDetection() {
   }
 }
 
+
 function randomValue(min, max) {
   return Math.random() * (max - min) + min;
 }
+
 
 function makePipe() {
   var pipe = {
     x: CVS.width,
     topY: randomValue(PIPECONSTS.MINY, PIPECONSTS.MAXY)
   }
-  // push this new pipe into the pipes array
-  pipes.push(pipe);
+  // unshift this new pipe into the front of the pipes array
+  pipes.unshift(pipe);
 };
 
 function draw() {
@@ -95,13 +99,15 @@ function draw() {
     CTX.fillStyle = colours.pipesColour;
     CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
 
-    if (pipes[i].x > - PIPECONSTS.WIDTH) {
+    if (pipes[0].x < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
+      // making a pipe when the frontmost pipe is at the set distance
+      makePipe();
+    } else if (pipes[i].x < - PIPECONSTS.WIDTH){
+    // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
+    pipes.pop();
+    } else {
+      // moving the pipe
       pipes[i].x -= 3;
-    } else{
-    // shift removes the first item in an array, which is the left most pipe
-    pipes.shift();
-    // make pipe function to make a new pipe
-    makePipe();
     }
   }
 
@@ -140,14 +146,17 @@ function draw() {
   }
 
   collisionDetection();
-  console.log(badCollision);
   window.requestAnimationFrame(draw);
+  console.log(badCollision);
 };
 
 
-
+// event listeners for the controller
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
 
+// making a pipe so that there is one ready for the game
 makePipe();
+
+// calling the draw function for the first time
 window.requestAnimationFrame(draw);
