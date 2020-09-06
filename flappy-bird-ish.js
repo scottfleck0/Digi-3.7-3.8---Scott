@@ -1,18 +1,36 @@
 const CVS = document.getElementById("gameCanvas");
 const CTX = CVS.getContext('2d');
 
+// function to get a random value
+function randomValue(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 // constant for the height of the floor
 const FLOORHEIGHT = 3 * (CVS.height / 4);
 
-// constant for gravity
+// constants for jumping animation
 const GRAVITY = 0.35;
 const JUMPSTRENGTH = -6;
+
+// var for Score
+var score = 0;
 
 // variable for collision detection
 var badCollision = false;
 
-// array for the pipes
+// array for the pipes and coins
 var pipes = [];
+var coins = [];
+
+// speed for all the objects in the game
+const OBJSPEED = 3;
+
+// constants for floating items
+const FLOATCONSTS = {
+  MINY: 50,
+  MAXY: FLOORHEIGHT - 50
+}
 
 // variable containing colours
 var colours = {
@@ -35,9 +53,10 @@ const PIPECONSTS = {
   WIDTH: 20,
   GAPHEIGHT: 100,
   MINY: 30,
-  MAXY: FLOORHEIGHT - 100 - 30,
+  MAXY: FLOORHEIGHT - 100 - 30,// the 100 is the gapheight but it theoretically isn't defined yet so I need to put 100 instead of the variable
   DISTANCEBETWEEN: CVS.width / 2
 };
+
 
 var controller = {
   space: false,
@@ -72,11 +91,6 @@ function collisionDetection() {
 }
 
 
-function randomValue(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-
 function makePipe() {
   var pipe = {
     x: CVS.width,
@@ -85,6 +99,53 @@ function makePipe() {
   // unshift this new pipe into the front of the pipes array
   pipes.unshift(pipe);
 };
+
+function makeCoin() {
+  var coinChoice = randomValue(0, 3);
+
+  var coin1 = {
+    value: 1,
+    colour: "brown",
+    radius: 20,
+    x: CVS.width + 30,
+    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
+  };
+
+  var coin2 = {
+    value: 5,
+    colour: "silver",
+    radius: 15,
+    x: CVS.width + 20,
+    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
+  };
+
+  var coin3 = {
+    value: 10,
+    colour: "gold",
+    radius: 10,
+    x: CVS.width + 10,
+    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
+  };
+
+  // unshift the selected coin into the front of the coins array
+  if (coinChoice >= 0 && coinChoice < 1) {
+
+    coin1.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin1.radius;
+    coins.unshift(coin1);
+
+  } else if(coinChoice >= 1 && coinChoice < 2){
+
+    coin2.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin2.radius;
+    coins.unshift(coin2);
+
+  }else if(coinChoice >= 2 && coinChoice <= 3){
+
+    coin3.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin3.radius;
+    coins.unshift(coin3);
+
+  }
+};
+
 
 function draw() {
   // drawing the sky
@@ -102,14 +163,39 @@ function draw() {
     if (pipes[0].x < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
       // making a pipe when the frontmost pipe is at the set distance
       makePipe();
+
     } else if (pipes[i].x < - PIPECONSTS.WIDTH){
-    // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
-    pipes.pop();
+      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
+      pipes.pop();
+
     } else {
       // moving the pipe
-      pipes[i].x -= 3;
+      pipes[i].x -= OBJSPEED;
     }
   }
+
+  // drawing the coins
+  for (var i = 0; i < coins.length; i++) {
+    CTX.beginPath();
+    CTX.arc(coins[i].x, coins[i].y, coins[i].radius, 0, Math.PI * 2);
+    CTX.fillStyle = coins[i].colour;
+    CTX.fill();
+
+    if (coins[0].x - coins[0].radius < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
+      // making a pipe when the frontmost pipe is at the set distance
+      makeCoin();
+
+    } else if (coins[i].x < - PIPECONSTS.WIDTH){
+      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
+      coins.pop();
+
+    } else {
+      // moving the pipe
+      coins[i].x -= OBJSPEED;
+    }
+  }
+
+
 
   //drawing the ground
   CTX.fillStyle = colours.groundColour;
@@ -147,7 +233,6 @@ function draw() {
 
   collisionDetection();
   window.requestAnimationFrame(draw);
-  console.log(badCollision);
 };
 
 
@@ -155,8 +240,9 @@ function draw() {
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
 
-// making a pipe so that there is one ready for the game
+// making a pipe and coin so that there is one ready for the game
 makePipe();
+makeCoin();
 
 // calling the draw function for the first time
 window.requestAnimationFrame(draw);
