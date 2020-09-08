@@ -13,11 +13,9 @@ const FLOORHEIGHT = 3 * (CVS.height / 4);
 const GRAVITY = 0.35;
 const JUMPSTRENGTH = -6;
 
-// var for Score
+// vars for score and lives
 var score = 0;
-
-// variable for collision detection
-var badCollision = false;
+var lives = 3;
 
 // array for the pipes and coins
 var pipes = [];
@@ -76,16 +74,24 @@ var controller = {
   }
 };
 
-// function for collision detection for the pipes
+// function for collision detection
 function collisionDetection() {
+  // collision detection for the pipes
   for (var i = 0; i < pipes.length; i++) {
-
-    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {
-      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) {
-        badCollision = true;
+    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// y axis
+      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // x axis
+        lives -= 3;
       }
-    } else {
-      badCollision = false;
+    }
+  }
+
+  // collision detection for the coins
+  for (var i = 0; i < coins.length; i++) {
+    if (character.x + character.radius * 0.67 > coins[i].x - coins[i].radius * 0.67 && character.x - character.radius * 0.67 < coins[i].x + coins[i].radius * 0.67) { // if the coin and character line up on the x axis
+      if (character.y - character.radius * 0.67 < coins[i].y + coins[i].radius * 0.67 && character.y + character.radius * 0.67 > coins[i].y - coins[i].radius * 0.67) { // if they line up on the y
+        score += coins[i].value;
+        coins.splice(i,1);
+      }
     }
   }
 }
