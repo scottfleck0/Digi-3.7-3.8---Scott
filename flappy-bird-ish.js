@@ -17,9 +17,10 @@ const JUMPSTRENGTH = -6;
 var score = 0;
 var lives = 3;
 
-// array for the pipes and coins
+// arrays for the pipes, coins and floating obstacles
 var pipes = [];
 var coins = [];
+var obstacles = [];
 
 // speed for all the objects in the game
 const OBJSPEED = 3;
@@ -35,7 +36,8 @@ var colours = {
   skyColour: "#33CCFF",
   groundColour: "#009900",
   characterColour: "#ffff00",
-  pipesColour: "black"
+  pipesColour: "black",
+  obsColour: "red"
 }
 
 // variable containing all the character information
@@ -76,16 +78,16 @@ var controller = {
 
 // function for collision detection
 function collisionDetection() {
-  // collision detection for the pipes
+  // collision detection for the pipes and the character
   for (var i = 0; i < pipes.length; i++) {
-    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// y axis
-      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // x axis
-        lives -= 3;
+    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// x axis
+      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
+        lives = 0;
       }
     }
   }
 
-  // collision detection for the coins
+  // collision detection for the coins and the character
   for (var i = 0; i < coins.length; i++) {
     if (character.x + character.radius * 0.67 > coins[i].x - coins[i].radius * 0.67 && character.x - character.radius * 0.67 < coins[i].x + coins[i].radius * 0.67) { // if the coin and character line up on the x axis
       if (character.y - character.radius * 0.67 < coins[i].y + coins[i].radius * 0.67 && character.y + character.radius * 0.67 > coins[i].y - coins[i].radius * 0.67) { // if they line up on the y
@@ -94,9 +96,19 @@ function collisionDetection() {
       }
     }
   }
+
+  // collision detection between the coins and obstacles
+  for (var i = 0; i < obstacles.length; i++) {
+    if (obstacles[i].x < coins[0].x + coins[0].radius && obstacles[i].x + obstacles[i].width > coins[0].x - coins[0].radius) {
+      if (obstacles[i].y - 20< coins[0].y + coins[0].radius && obstacles[i].y + obstacles[i].height + 20 > coins[0].y - coins[0].radius) {
+        obstacles.splice(i,1);
+        console.log("overlap");
+      }
+    }
+  }
 }
 
-
+// function to make a new pipe
 function makePipe() {
   var pipe = {
     x: CVS.width,
@@ -106,9 +118,11 @@ function makePipe() {
   pipes.unshift(pipe);
 };
 
+// function to make a new coin
 function makeCoin() {
   var coinChoice = randomValue(0, 3);
 
+  // variables for each type of coin
   var coin1 = {
     value: 1,
     colour: "brown",
@@ -150,6 +164,21 @@ function makeCoin() {
     coins.unshift(coin3);
 
   }
+};
+
+// function to make a new obstacle
+function makeObstacle() {
+  // variables for each size obs
+  var obs = {
+    lifeLost: 1,
+    width: randomValue(20, 30),
+    height: randomValue(20, 30),
+    x: pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2,
+    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
+  };
+
+  obstacles.unshift(obs);
+
 };
 
 
@@ -201,7 +230,25 @@ function draw() {
     }
   }
 
+  // drawing the obstacles
+  for (var i = 0; i < obstacles.length; i++) {
 
+    CTX.fillStyle = colours.obsColour;
+    CTX.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+
+    if (obstacles[0].x - obstacles[0].width < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
+      // making an obs when the frontmost obs is at the set distance
+      makeObstacle();
+
+    } else if (obstacles[i].x < - obstacles[i].width){
+      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost obs.
+      obstacles.pop();
+
+    } else {
+      // moving the obs
+      obstacles[i].x -= OBJSPEED;
+    }
+  }
 
   //drawing the ground
   CTX.fillStyle = colours.groundColour;
@@ -212,6 +259,24 @@ function draw() {
   CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
   CTX.fillStyle = colours.characterColour;
   CTX.fill();
+
+  // writing the score
+  CTX.font = "20px Arial";
+  CTX.strokeStyle = "white";
+  CTX.strokeText("Score: ", CVS.width - 170, 30);
+  CTX.strokeText(score, CVS.width - 100, 30);
+  CTX.fillStyle = "black";
+  CTX.fillText("Score: ", CVS.width - 170, 30);
+  CTX.fillText(score, CVS.width - 100, 30);
+
+  // writing the score
+  CTX.font = "20px Arial";
+  CTX.strokeStyle = "white";
+  CTX.strokeText("Lives: ", 30, 30);
+  CTX.strokeText(lives, 100, 30);
+  CTX.fillStyle = "black";
+  CTX.fillText("Lives: ", 30, 30);
+  CTX.fillText(lives, 100, 30);
 
 // if the spacebar has been pressed and not released, the character jumps
   if (controller.space && character.jumping === false) {
@@ -249,6 +314,7 @@ window.addEventListener("keyup", controller.keyListener);
 // making a pipe and coin so that there is one ready for the game
 makePipe();
 makeCoin();
+makeObstacle();
 
 // calling the draw function for the first time
 window.requestAnimationFrame(draw);
