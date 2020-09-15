@@ -6,6 +6,9 @@ function randomValue(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+// variable for if the game is running or not
+var gameRunning = true;
+
 // constant for the height of the floor
 const FLOORHEIGHT = 3 * (CVS.height / 4);
 
@@ -60,6 +63,7 @@ const PIPECONSTS = {
 
 var controller = {
   space: false,
+  rKey: false,
 
   keyListener: function(event){
 
@@ -70,6 +74,10 @@ var controller = {
 
     case 32: // spacebar
         controller.space = keyState;
+        break;
+
+    case 82: // r key
+        controller.rKey = keyState;
         break;
 
     }
@@ -83,6 +91,16 @@ function collisionDetection() {
     if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// x axis
       if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
         lives = 0;
+      }
+    }
+  }
+
+  // collision detection for the floating obstacles and the character
+  for (var i = 0; i < obstacles.length; i++) {
+    if (character.x + character.radius * 0.8 > obstacles[i].x && character.x - character.radius * 0.8 < obstacles[i].x + obstacles[i].width) {// x axis
+      if (character.y - character.radius * 0.8 < obstacles[i].y + obstacles[i].height && character.y + character.radius * 0.8 > obstacles[i].y) { // y axis
+        lives -= 1;
+        obstacles.splice(i,1);
       }
     }
   }
@@ -102,7 +120,7 @@ function collisionDetection() {
     if (obstacles[i].x < coins[0].x + coins[0].radius && obstacles[i].x + obstacles[i].width > coins[0].x - coins[0].radius) {
       if (obstacles[i].y - 20< coins[0].y + coins[0].radius && obstacles[i].y + obstacles[i].height + 20 > coins[0].y - coins[0].radius) {
         obstacles.splice(i,1);
-        console.log("overlap");
+        makeObstacle();
       }
     }
   }
@@ -183,6 +201,9 @@ function makeObstacle() {
 
 
 function draw() {
+
+  collisionDetection();
+
   // drawing the sky
   CTX.fillStyle = colours.skyColour;
   CTX.fillRect(0, 0, CVS.width, CVS.height);
@@ -217,15 +238,15 @@ function draw() {
     CTX.fill();
 
     if (coins[0].x - coins[0].radius < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
-      // making a pipe when the frontmost pipe is at the set distance
+      // making a coin when the frontmost coin is at the set distance
       makeCoin();
 
     } else if (coins[i].x < - PIPECONSTS.WIDTH){
-      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
+      // pop removes the last item in an array, which seeing as the coins are added to the front of the array, the pop will remove the leftmost coin.
       coins.pop();
 
     } else {
-      // moving the pipe
+      // moving the coins
       coins[i].x -= OBJSPEED;
     }
   }
@@ -241,7 +262,7 @@ function draw() {
       makeObstacle();
 
     } else if (obstacles[i].x < - obstacles[i].width){
-      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost obs.
+      // pop removes the last item in an array, which seeing as the obstacles are added to the front of the array, the pop will remove the leftmost obs.
       obstacles.pop();
 
     } else {
@@ -302,19 +323,102 @@ function draw() {
 
   }
 
-  collisionDetection();
-  window.requestAnimationFrame(draw);
+  // checking lives to see if game needs to stop
+  if(lives <= 0) {
+    gameRunning = false;
+  } else {
+    gameRunning = true;
+  }
 };
 
+
+
+function died(){
+
+  CTX.fillStyle = colours.skyColour;
+  CTX.fillRect(0, 0, CVS.width, CVS.height);
+
+  // drawing pipes
+  for (var i = 0; i < pipes.length; i++) {
+    CTX.fillStyle = colours.pipesColour;
+    CTX.fillRect(pipes[i].x, pipes[i].topY, PIPECONSTS.WIDTH, - pipes[i].topY);
+
+    CTX.fillStyle = colours.pipesColour;
+    CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
+  }
+
+  // drawing the coins
+  for (var i = 0; i < coins.length; i++) {
+    CTX.beginPath();
+    CTX.arc(coins[i].x, coins[i].y, coins[i].radius, 0, Math.PI * 2);
+    CTX.fillStyle = coins[i].colour;
+    CTX.fill();
+  }
+
+  // drawing the obstacles
+  for (var i = 0; i < obstacles.length; i++) {
+
+    CTX.fillStyle = colours.obsColour;
+    CTX.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+
+  }
+
+  // writing the score
+  CTX.font = "100px Arial";
+  CTX.strokeStyle = "white";
+  CTX.strokeText("Lives: ", 30, 30);
+  CTX.strokeText(lives, 100, 30);
+  CTX.fillStyle = "black";
+  CTX.fillText("Lives: ", 30, 30);
+  CTX.fillText(lives, 100, 30);
+
+  //drawing the ground
+  CTX.fillStyle = colours.groundColour;
+  CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
+
+  // drawing the character
+  CTX.beginPath();
+  CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
+  CTX.fillStyle = colours.characterColour;
+  CTX.fill();
+}
 
 // event listeners for the controller
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
 
-// making a pipe and coin so that there is one ready for the game
+function reset() {
+  score = 0;
+  lives = 3;
+  pipes.splice(0, pipes.length);
+  coins.splice(0, coins.length);
+  obstacles.splice(0, obstacles.length);
+
+  makePipe();
+  makeCoin();
+  makeObstacle();
+  gameRunning = true;
+}
+// loop function to allow the game to stop and start
+function loop() {
+
+  if (gameRunning === false && controller.rKey){
+    reset();
+  }
+
+  if (gameRunning) {
+    draw();
+  } else if (gameRunning = false){
+    died();
+  }
+  window.requestAnimationFrame(loop);
+
+}
+
+// making a pipe and coin and an obstacle so that they are ready for the game
 makePipe();
 makeCoin();
 makeObstacle();
 
-// calling the draw function for the first time
-window.requestAnimationFrame(draw);
+// calling the loop function for the first time to start the loop
+window.requestAnimationFrame(loop);
