@@ -20,6 +20,8 @@ const JUMPSTRENGTH = -6;
 var score = 0;
 var lives = 3;
 
+var scoreboard = []; // array for the scores which will be used for the scoreboard
+
 // arrays for the pipes, coins and floating obstacles
 var pipes = [];
 var coins = [];
@@ -60,7 +62,6 @@ const PIPECONSTS = {
   DISTANCEBETWEEN: CVS.width / 2
 };
 
-
 var controller = {
   space: false,
   rKey: false,
@@ -89,7 +90,7 @@ function collisionDetection() {
   // collision detection for the pipes and the character
   for (var i = 0; i < pipes.length; i++) {
     if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// x axis
-      if (character.y - character.radius < pipes[i].topY || character.y + character.radius > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
+      if (character.y - character.radius * 0.8 < pipes[i].topY || character.y + character.radius * 0.8 > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
         lives = 0;
       }
     }
@@ -325,12 +326,21 @@ function draw() {
 
   // checking lives to see if game needs to stop
   if(lives <= 0) {
+
+    scoreboard.push(score);
+    score = 0;
+    scoreboard.sort(function(a, b){return b - a});
+
+    if (scoreboard.length > 5){
+
+      scoreboard.pop();
+
+    }
+
     gameRunning = false;
-  } else {
-    gameRunning = true;
+
   }
 };
-
 
 
 function died(){
@@ -340,19 +350,23 @@ function died(){
 
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
+
     CTX.fillStyle = colours.pipesColour;
     CTX.fillRect(pipes[i].x, pipes[i].topY, PIPECONSTS.WIDTH, - pipes[i].topY);
 
     CTX.fillStyle = colours.pipesColour;
     CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
+
   }
 
   // drawing the coins
   for (var i = 0; i < coins.length; i++) {
+
     CTX.beginPath();
     CTX.arc(coins[i].x, coins[i].y, coins[i].radius, 0, Math.PI * 2);
     CTX.fillStyle = coins[i].colour;
     CTX.fill();
+
   }
 
   // drawing the obstacles
@@ -363,14 +377,36 @@ function died(){
 
   }
 
-  // writing the score
-  CTX.font = "100px Arial";
+  // Writing up the scoreboard
+  // "Scoreboard"
+  CTX.font = "30px Arial";
   CTX.strokeStyle = "white";
-  CTX.strokeText("Lives: ", 30, 30);
-  CTX.strokeText(lives, 100, 30);
+  CTX.strokeText("Scoreboard", CVS.width / 2 - 110, scoreboardYPos - 40);
   CTX.fillStyle = "black";
-  CTX.fillText("Lives: ", 30, 30);
-  CTX.fillText(lives, 100, 30);
+  CTX.fillText("Scoreboard",  CVS.width / 2 - 110, scoreboardYPos - 40);
+
+  // scores
+  for (var i = 0; i < scoreboard.length; i++) {
+
+    CTX.font = "20px Arial";
+    CTX.strokeStyle = "white";
+    CTX.strokeText(i + 1,  CVS.width / 2 - 100, scoreboardYPos);
+    CTX.strokeText(":",  CVS.width / 2 - 90, scoreboardYPos);
+    CTX.strokeText(scoreboard[i], CVS.width / 2, scoreboardYPos);
+    CTX.fillStyle = "black";
+    CTX.fillText(i + 1,  CVS.width / 2 - 100, scoreboardYPos);
+    CTX.fillText(":",  CVS.width / 2 - 90, scoreboardYPos);
+    CTX.fillText(scoreboard[i],  CVS.width / 2, scoreboardYPos);
+    scoreboardYPos += 30;
+
+  }
+
+  // message to restart
+  CTX.font = "25px Arial";
+  CTX.strokeStyle = "white";
+  CTX.strokeText("Press R to Restart", CVS.width / 2 - 135, scoreboardYPos + 30);
+  CTX.fillStyle = "black";
+  CTX.fillText("Press R to Restart",  CVS.width / 2 - 135, scoreboardYPos + 30);
 
   //drawing the ground
   CTX.fillStyle = colours.groundColour;
@@ -381,14 +417,11 @@ function died(){
   CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
   CTX.fillStyle = colours.characterColour;
   CTX.fill();
+
 }
 
-// event listeners for the controller
-window.addEventListener("keydown", controller.keyListener);
-window.addEventListener("keyup", controller.keyListener);
-
+// reset function for starting up again after you die
 function reset() {
-  score = 0;
   lives = 3;
   pipes.splice(0, pipes.length);
   coins.splice(0, coins.length);
@@ -399,21 +432,30 @@ function reset() {
   makeObstacle();
   gameRunning = true;
 }
+
+var scoreboardYPos; // making the y position variable for the scoreboard
+
 // loop function to allow the game to stop and start
 function loop() {
 
-  if (gameRunning === false && controller.rKey){
+  if (gameRunning === false && controller.rKey){ // if the r key is pressed while the game has stopped
     reset();
   }
 
   if (gameRunning) {
-    draw();
-  } else if (gameRunning = false){
-    died();
+    draw(); // if the game is running then call draw
+  } else if (gameRunning === false){
+    scoreboardYPos = FLOORHEIGHT - 200;
+    died(); // if it isn't running call the died function
   }
-  window.requestAnimationFrame(loop);
 
+  window.requestAnimationFrame(loop); // recalling the function to make it a loop
 }
+
+
+// event listeners for the controller
+window.addEventListener("keydown", controller.keyListener);
+window.addEventListener("keyup", controller.keyListener);
 
 // making a pipe and coin and an obstacle so that they are ready for the game
 makePipe();
