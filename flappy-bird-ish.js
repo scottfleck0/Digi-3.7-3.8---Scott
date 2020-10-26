@@ -15,22 +15,33 @@ function randomValue(min, max) {
 }
 
 
+
 // bringing in audio
-let jump = new Audio();
-jump.src = "Audio/jump.m4a";
+const JUMP = new Audio();
+JUMP.src = "Audio/jump.m4a";
 
-let point = new Audio();
-point.src = "Audio/point.m4a";
+const POINT = new Audio();
+POINT.src = "Audio/point.m4a";
 
-let hit = new Audio();
-hit.src = "Audio/hitPipe.m4a";
+const HIT = new Audio();
+HIT.src = "Audio/hitPipe.m4a";
 
-let dieSound = new Audio();
-dieSound.src = "Audio/die.mp3";
+const DIESOUND = new Audio();
+DIESOUND.src = "Audio/die.mp3";
 
+// bringing in images
+const PIPESPRITE = new Image();
+PIPESPRITE.src = "Images/pipeSprite.png";
+
+const CHARACTERSPRITE = new Image();
+CHARACTERSPRITE.src = "Images/birdSpriteSheet.tps";
+
+const COINSSPRITE = new Image();
+COINSSPRITE.src = "Images/coinSpriteSheet.tps";
 
 // constant for the height of the floor
 const FLOORHEIGHT = 3 * (CVS.height / 4);
+
 
 
 // constants for jumping animation
@@ -136,8 +147,8 @@ function collisionDetection() {
 
       if (character.y - character.radius * 0.8 < pipes[i].topY || character.y + character.radius * 0.8 > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
 
-        hit.play();
-        dieSound.play();
+        HIT.play();
+        DIESOUND.play();
         lives = 0;
 
       }
@@ -155,12 +166,12 @@ function collisionDetection() {
 
         if (lives <= 0) {
 
-          hit.play();
-          dieSound.play();
+          HIT.play();
+          DIESOUND.play();
 
         }else if (lives > 0){
 
-          hit.play();
+          HIT.play();
 
         }
 
@@ -179,7 +190,7 @@ function collisionDetection() {
 
         score += coins[i].value;
         coins.splice(i,1);
-        point.play();
+        POINT.play();
 
       }
     }
@@ -410,7 +421,7 @@ function draw() {
   // if the spacebar has been pressed and not released, the character jumps
   if (controller.space && character.jumping === false) {
 
-    jump.play();
+    JUMP.play();
     character.jumping = true;
     character.yVelocity = JUMPSTRENGTH;
 
