@@ -84,7 +84,6 @@ var colours = {
   skyColour: "#33CCFF",
   groundColour: "#009900",
   characterColour: "#ffff00",
-  pipesColour: "black",
   obsColour: "red"
 
 }
@@ -93,18 +92,23 @@ var colours = {
 // variable containing all the character information
 var character = {
 
+  source: CHARACTERSPRITE,
+  sx: 0,
+  sy: 0,
+  sxd: 19,
+  syd: 14,
   x: 100,
   y: 100,
-  radius: 15,
   yVelocity: 0,
   jumping: false
 
 };
 
 
+
+
 const PIPECONSTS = {
 
-  WIDTH: 20,
   GAPHEIGHT: 100,
   MINY: 30,
   MAXY: FLOORHEIGHT - 100 - 30,// the 100 is the gapheight but it theoretically isn't defined yet so I need to put 100 instead of the variable
@@ -140,12 +144,13 @@ var controller = {
 
 // function for collision detection
 function collisionDetection() {
+
   // collision detection for the pipes and the character
   for (var i = 0; i < pipes.length; i++) {
 
-    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPESPRITE.width * 2) {// x axis
+    if (character.x + character.sxd > pipes[i].x && character.x < pipes[i].x + PIPESPRITE.width * 2) {// x axis
 
-      if (character.y - character.radius * 0.8 < pipes[i].topY || character.y + character.radius * 0.8 > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
+      if (character.y < pipes[i].topY || character.y + character.syd > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
 
         HIT.play();
         DIESOUND.play();
@@ -158,9 +163,9 @@ function collisionDetection() {
   // collision detection for the floating obstacles and the character
   for (var i = 0; i < obstacles.length; i++) {
 
-    if (character.x + character.radius * 0.8 > obstacles[i].x && character.x - character.radius * 0.8 < obstacles[i].x + obstacles[i].width) {// x axis
+    if (character.x + character.sxd > obstacles[i].x && character.x < obstacles[i].x + obstacles[i].width) {// x axis
 
-      if (character.y - character.radius * 0.8 < obstacles[i].y + obstacles[i].height && character.y + character.radius * 0.8 > obstacles[i].y) { // y axis
+      if (character.y < obstacles[i].y + obstacles[i].height && character.y + character.syd > obstacles[i].y) { // y axis
 
         lives -= 1;
 
@@ -184,9 +189,9 @@ function collisionDetection() {
   // collision detection for the coins and the character
   for (var i = 0; i < coins.length; i++) {
 
-    if (character.x + character.radius * 0.67 > coins[i].x - coins[i].radius * 0.67 && character.x - character.radius * 0.67 < coins[i].x + coins[i].radius * 0.67) { // if the coin and character line up on the x axis
+    if (character.x + character.sxd > coins[i].x && character.x < coins[i].x + coins[i].sxd) { // if the coin and character line up on the x axis
 
-      if (character.y - character.radius * 0.67 < coins[i].y + coins[i].radius * 0.67 && character.y + character.radius * 0.67 > coins[i].y - coins[i].radius * 0.67) { // if they line up on the y
+      if (character.y < coins[i].y + coins[i].syd && character.y + character.syd > coins[i].y) { // if they line up on the y
 
         score += coins[i].value;
         coins.splice(i,1);
@@ -198,9 +203,9 @@ function collisionDetection() {
 
   // collision detection between the coins and obstacles
   for (var i = 0; i < obstacles.length; i++) {
-    if (obstacles[i].x < coins[0].x + coins[0].radius && obstacles[i].x + obstacles[i].width > coins[0].x - coins[0].radius) {
+    if (obstacles[i].x < coins[0].x + coins[0].sxd && obstacles[i].x + obstacles[i].width > coins[0].x) {
 
-      if (obstacles[i].y - 20 < coins[0].y + coins[0].radius && obstacles[i].y + obstacles[i].height + 20 > coins[0].y - coins[0].radius) {
+      if (obstacles[i].y - 20 < coins[0].y + coins[0].syd && obstacles[i].y + obstacles[i].height + 20 > coins[0].y) {
 
         obstacles.splice(i,1);
         makeObstacle();
@@ -232,29 +237,38 @@ function makeCoin() {
   var coinChoice = randomValue(0, 3);
 
   // variables for each type of coin
-  var coin1 = {
+  var bronzeCoin = {
     value: 1,
-    colour: "brown",
-    radius: 20,
-    x: CVS.width + 30,
-    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
-  };
-
-
-  var coin2 = {
-    value: 5,
-    colour: "silver",
-    radius: 15,
+    source: COINSSPRITE,
+    sx: 0,
+    sy: 0,
+    sxd: COINSSPRITE.height,
+    syd: COINSSPRITE.height,
     x: CVS.width + 20,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
 
-  var coin3 = {
+  var silverCoin = {
+    value: 5,
+    source: COINSSPRITE,
+    sx: 16,
+    sy: 0,
+    sxd: 12,
+    syd: 13,
+    x: CVS.width + 20,
+    y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
+  };
+
+
+  var goldCoin = {
     value: 10,
-    colour: "gold",
-    radius: 10,
-    x: CVS.width + 10,
+    source: COINSSPRITE,
+    sx: 29,
+    sy: 0,
+    sxd: 11,
+    syd: 11,
+    x: CVS.width + 20,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
@@ -262,18 +276,18 @@ function makeCoin() {
   // unshift the selected coin into the front of the coins array
   if (coinChoice >= 0 && coinChoice < 1) {
 
-    coin1.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin1.radius;
-    coins.unshift(coin1);
+    bronzeCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + bronzeCoin.sxd;
+    coins.unshift(bronzeCoin);
 
   } else if(coinChoice >= 1 && coinChoice < 2){
 
-    coin2.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin2.radius;
-    coins.unshift(coin2);
+    silverCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + silverCoin.sxd;
+    coins.unshift(silverCoin);
 
   }else if(coinChoice >= 2 && coinChoice <= 3){
 
-    coin3.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + coin3.radius;
-    coins.unshift(coin3);
+    goldCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + goldCoin.sxd;
+    coins.unshift(goldCoin);
 
   }
 };
@@ -335,12 +349,9 @@ function draw() {
   // drawing the coins
   for (var i = 0; i < coins.length; i++) {
 
-    CTX.beginPath();
-    CTX.arc(coins[i].x, coins[i].y, coins[i].radius, 0, Math.PI * 2);
-    CTX.fillStyle = coins[i].colour;
-    CTX.fill();
+    CTX.drawImage(coins[i].source, coins[i].sx, coins[i].sy, coins[i].sxd, coins[i].syd, coins[i].x, coins[i].y, coins[i].sxd * 2, coins[i].syd * 2);
 
-    if (coins[0].x - coins[0].radius < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
+    if (coins[0].x - coins[0].sxd < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
 
       // making a coin when the frontmost coin is at the set distance
       makeCoin();
@@ -388,10 +399,7 @@ function draw() {
 
 
   // drawing the character
-  CTX.beginPath();
-  CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
-  CTX.fillStyle = colours.characterColour;
-  CTX.fill();
+  CTX.drawImage(CHARACTERSPRITE, character.sx, character.sy, character.sxd, character.syd, character.x, character.y, character.sxd * 1.8, character.syd * 1.8);
 
 
   // writing the score
@@ -479,10 +487,7 @@ function died(){
   // drawing the coins
   for (var i = 0; i < coins.length; i++) {
 
-    CTX.beginPath();
-    CTX.arc(coins[i].x, coins[i].y, coins[i].radius, 0, Math.PI * 2);
-    CTX.fillStyle = coins[i].colour;
-    CTX.fill();
+    CTX.drawImage(coins[i].source, coins[i].sx, coins[i].sy, coins[i].sxd, coins[i].syd, coins[i].x, coins[i].y, coins[i].sxd * 2, coins[i].syd * 2);
 
   }
 
