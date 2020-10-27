@@ -31,13 +31,13 @@ DIESOUND.src = "Audio/die.mp3";
 
 // bringing in images
 const PIPESPRITE = new Image();
-PIPESPRITE.src = "Images/pipeSprite.png";
+PIPESPRITE.src = "Images/pipeSpriteSheet.png";
 
 const CHARACTERSPRITE = new Image();
-CHARACTERSPRITE.src = "Images/birdSpriteSheet.tps";
+CHARACTERSPRITE.src = "Images/birdSpriteSheet.png";
 
 const COINSSPRITE = new Image();
-COINSSPRITE.src = "Images/coinSpriteSheet.tps";
+COINSSPRITE.src = "Images/coinSpriteSheet.png";
 
 // constant for the height of the floor
 const FLOORHEIGHT = 3 * (CVS.height / 4);
@@ -143,7 +143,7 @@ function collisionDetection() {
   // collision detection for the pipes and the character
   for (var i = 0; i < pipes.length; i++) {
 
-    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPECONSTS.WIDTH) {// x axis
+    if (character.x + character.radius > pipes[i].x && character.x - character.radius < pipes[i].x + PIPESPRITE.width * 2) {// x axis
 
       if (character.y - character.radius * 0.8 < pipes[i].topY || character.y + character.radius * 0.8 > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
 
@@ -310,20 +310,16 @@ function draw() {
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
 
-    CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY, PIPECONSTS.WIDTH, - pipes[i].topY);
+    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
-
-    CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
-
+    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
     if (pipes[0].x < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
 
       // making a pipe when the frontmost pipe is at the set distance
       makePipe();
 
-    } else if (pipes[i].x < - PIPECONSTS.WIDTH){
+    } else if (pipes[i].x < - PIPESPRITE.WIDTH){
 
       // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
       pipes.pop();
@@ -473,11 +469,9 @@ function died(){
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
 
-    CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY, PIPECONSTS.WIDTH, - pipes[i].topY);
+    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
-    CTX.fillStyle = colours.pipesColour;
-    CTX.fillRect(pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPECONSTS.WIDTH, CVS.height - pipes[i].topY - PIPECONSTS.GAPHEIGHT);
+    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
   }
 
