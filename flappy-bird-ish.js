@@ -148,9 +148,9 @@ function collisionDetection() {
   // collision detection for the pipes and the character
   for (var i = 0; i < pipes.length; i++) {
 
-    if (character.x + character.sxd > pipes[i].x && character.x < pipes[i].x + PIPESPRITE.width * 2) {// x axis
+    if (character.x + character.sxd * 1.8 > pipes[i].x && character.x < pipes[i].x + PIPESPRITE.width * 1.8) {// x axis
 
-      if (character.y < pipes[i].topY || character.y + character.syd > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
+      if (character.y < pipes[i].topY || character.y + character.syd * 1.8 > pipes[i].topY + PIPECONSTS.GAPHEIGHT) { // y axis
 
         HIT.play();
         DIESOUND.play();
@@ -163,9 +163,9 @@ function collisionDetection() {
   // collision detection for the floating obstacles and the character
   for (var i = 0; i < obstacles.length; i++) {
 
-    if (character.x + character.sxd > obstacles[i].x && character.x < obstacles[i].x + obstacles[i].width) {// x axis
+    if (character.x + character.sxd * 1.8 > obstacles[i].x && character.x < obstacles[i].x + obstacles[i].width) {// x axis
 
-      if (character.y < obstacles[i].y + obstacles[i].height && character.y + character.syd > obstacles[i].y) { // y axis
+      if (character.y < obstacles[i].y + obstacles[i].height && character.y + character.syd * 1.8 > obstacles[i].y) { // y axis
 
         lives -= 1;
 
@@ -189,9 +189,9 @@ function collisionDetection() {
   // collision detection for the coins and the character
   for (var i = 0; i < coins.length; i++) {
 
-    if (character.x + character.sxd > coins[i].x && character.x < coins[i].x + coins[i].sxd) { // if the coin and character line up on the x axis
+    if (character.x + character.sxd * 1.8 > coins[i].x && character.x < coins[i].x + coins[i].sxd * 1.5) { // if the coin and character line up on the x axis
 
-      if (character.y < coins[i].y + coins[i].syd && character.y + character.syd > coins[i].y) { // if they line up on the y
+      if (character.y < coins[i].y + coins[i].syd * 1.5 && character.y + character.syd * 1.8 > coins[i].y) { // if they line up on the y
 
         score += coins[i].value;
         coins.splice(i,1);
@@ -203,9 +203,9 @@ function collisionDetection() {
 
   // collision detection between the coins and obstacles
   for (var i = 0; i < obstacles.length; i++) {
-    if (obstacles[i].x < coins[0].x + coins[0].sxd && obstacles[i].x + obstacles[i].width > coins[0].x) {
+    if (obstacles[i].x < coins[0].x + coins[0].sxd * 1.5 && obstacles[i].x + obstacles[i].width > coins[0].x) {
 
-      if (obstacles[i].y - 20 < coins[0].y + coins[0].syd && obstacles[i].y + obstacles[i].height + 20 > coins[0].y) {
+      if (obstacles[i].y - 20 < coins[0].y + coins[0].syd * 1.5 && obstacles[i].y + obstacles[i].height + 20 > coins[0].y) {
 
         obstacles.splice(i,1);
         makeObstacle();
@@ -244,7 +244,7 @@ function makeCoin() {
     sy: 0,
     sxd: COINSSPRITE.height,
     syd: COINSSPRITE.height,
-    x: CVS.width + 20,
+    x: CVS.width,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
@@ -256,7 +256,7 @@ function makeCoin() {
     sy: 0,
     sxd: 12,
     syd: 13,
-    x: CVS.width + 20,
+    x: CVS.width,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
@@ -268,7 +268,7 @@ function makeCoin() {
     sy: 0,
     sxd: 11,
     syd: 11,
-    x: CVS.width + 20,
+    x: CVS.width,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
@@ -276,17 +276,17 @@ function makeCoin() {
   // unshift the selected coin into the front of the coins array
   if (coinChoice >= 0 && coinChoice < 1) {
 
-    bronzeCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + bronzeCoin.sxd;
+    bronzeCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2;
     coins.unshift(bronzeCoin);
 
   } else if(coinChoice >= 1 && coinChoice < 2){
 
-    silverCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + silverCoin.sxd;
+    silverCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2;
     coins.unshift(silverCoin);
 
   }else if(coinChoice >= 2 && coinChoice <= 3){
 
-    goldCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2 + goldCoin.sxd;
+    goldCoin.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2;
     coins.unshift(goldCoin);
 
   }
@@ -429,6 +429,23 @@ function draw() {
     character.jumping = true;
     character.yVelocity = JUMPSTRENGTH;
 
+    // next 3 if statements animate the flapping for the bird
+    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+
+      character.sx += character.sxd;
+    }
+
+    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+      setTimeout(function () {
+        character.sx += character.sxd;
+      }, 100);
+    }
+    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+      setTimeout(function () {
+        character.sx = 0;
+      }, 200);
+    }
+
   // else if the spacebar has been release, the character is not jumping anymore
   } else if(controller.space === false){
 
@@ -439,10 +456,10 @@ function draw() {
   character.yVelocity += GRAVITY; // gravity changing y velocity
   character.y += character.yVelocity; // y velocity changing the characters y
 
-  // if rectangle is falling below floor line
-  if (character.y + character.radius > FLOORHEIGHT) {
+  // if character is falling below floor line
+  if (character.y + character.syd * 1.8 > FLOORHEIGHT) {
 
-    character.y = FLOORHEIGHT - character.radius;
+    character.y = FLOORHEIGHT - character.syd * 1.8;
     character.yVelocity = 0;
 
   }
@@ -532,12 +549,9 @@ function died(){
   CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
 
   // drawing the character
-  CTX.beginPath();
-  CTX.arc(character.x, character.y, character.radius, 0, Math.PI * 2);
-  CTX.fillStyle = colours.characterColour;
-  CTX.fill();
+  CTX.drawImage(CHARACTERSPRITE, character.sx, character.sy, character.sxd, character.syd, character.x, character.y, character.sxd * 1.8, character.syd * 1.8);
 
-  if (character.y + character.radius < FLOORHEIGHT) {
+  if (character.y + character.syd * 1.8 < FLOORHEIGHT) {
     character.yVelocity += GRAVITY; // gravity changing y velocity
     character.y += character.yVelocity; // y velocity changing the characters y
   }
