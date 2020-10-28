@@ -29,15 +29,20 @@ HIT.src = "Audio/hitPipe.m4a";
 const DIESOUND = new Audio();
 DIESOUND.src = "Audio/die.mp3";
 
+
 // bringing in images
 const PIPESPRITE = new Image();
 PIPESPRITE.src = "Images/pipeSpriteSheet.png";
 
 const CHARACTERSPRITE = new Image();
-CHARACTERSPRITE.src = "Images/birdSpriteSheet.png";
+CHARACTERSPRITE.src = "Images/batSpriteSheet.png";
 
 const COINSSPRITE = new Image();
 COINSSPRITE.src = "Images/coinSpriteSheet.png";
+
+const OBSTACLESPRITE = new Image();
+OBSTACLESPRITE.src = "Images/coinSpriteSheet.png";
+
 
 // constant for the height of the floor
 const FLOORHEIGHT = 3 * (CVS.height / 4);
@@ -95,8 +100,8 @@ var character = {
   source: CHARACTERSPRITE,
   sx: 0,
   sy: 0,
-  sxd: 19,
-  syd: 14,
+  sxd: 21,
+  syd: 13,
   x: 100,
   y: 100,
   yVelocity: 0,
@@ -324,9 +329,9 @@ function draw() {
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
 
-    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
+    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
-    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
+    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
     if (pipes[0].x < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
 
@@ -430,19 +435,21 @@ function draw() {
     character.yVelocity = JUMPSTRENGTH;
 
     // next 3 if statements animate the flapping for the bird
-    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+    if (character.sy < CHARACTERSPRITE.height - character.syd) {
 
-      character.sx += character.sxd;
+      character.sy += 13;
+      character.syd += 3;
     }
 
-    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+    if (character.sy < CHARACTERSPRITE.height - character.syd) {
       setTimeout(function () {
-        character.sx += character.sxd;
+        character.sy += 17;
       }, 100);
     }
-    if (character.sx < CHARACTERSPRITE.width - character.sxd) {
+    if (character.sy < CHARACTERSPRITE.height - character.syd) {
       setTimeout(function () {
-        character.sx = 0;
+        character.sy = 0;
+        character.syd = 13;
       }, 200);
     }
 
@@ -494,9 +501,9 @@ function died(){
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
 
-    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
+    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height); // top pipe
 
-    CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
+    CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height); // bottom pipe
 
   }
 
