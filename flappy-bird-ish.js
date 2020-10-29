@@ -41,7 +41,8 @@ const COINSSPRITE = new Image();
 COINSSPRITE.src = "Images/coinSpriteSheet.png";
 
 const OBSTACLESPRITE = new Image();
-OBSTACLESPRITE.src = "Images/coinSpriteSheet.png";
+OBSTACLESPRITE.src = "Images/obstacleSprite.png";
+
 
 
 // constant for the height of the floor
@@ -86,10 +87,9 @@ const FLOATCONSTS = {
 // variable containing colours
 var colours = {
 
-  skyColour: "#33CCFF",
-  groundColour: "#009900",
-  characterColour: "#ffff00",
-  obsColour: "red"
+  skyColour: "#33221f",
+  groundColour: "#4e342e",
+  characterColour: "#ffff00"
 
 }
 
@@ -168,9 +168,9 @@ function collisionDetection() {
   // collision detection for the floating obstacles and the character
   for (var i = 0; i < obstacles.length; i++) {
 
-    if (character.x + character.sxd * 1.8 > obstacles[i].x && character.x < obstacles[i].x + obstacles[i].width) {// x axis
+    if (character.x + character.sxd * 1.8 > obstacles[i].x && character.x < obstacles[i].x + OBSTACLESPRITE.width * 0.8) {// x axis
 
-      if (character.y < obstacles[i].y + obstacles[i].height && character.y + character.syd * 1.8 > obstacles[i].y) { // y axis
+      if (character.y < obstacles[i].y + OBSTACLESPRITE.height * 0.8 && character.y + character.syd * 1.8 > obstacles[i].y) { // y axis
 
         lives -= 1;
 
@@ -208,9 +208,9 @@ function collisionDetection() {
 
   // collision detection between the coins and obstacles
   for (var i = 0; i < obstacles.length; i++) {
-    if (obstacles[i].x < coins[0].x + coins[0].sxd * 1.5 && obstacles[i].x + obstacles[i].width > coins[0].x) {
+    if (obstacles[i].x < coins[0].x + coins[0].sxd * 1.5 && obstacles[i].x + OBSTACLESPRITE.width > coins[0].x) {
 
-      if (obstacles[i].y - 20 < coins[0].y + coins[0].syd * 1.5 && obstacles[i].y + obstacles[i].height + 20 > coins[0].y) {
+      if (obstacles[i].y - 20 < coins[0].y + coins[0].syd * 1.5 && obstacles[i].y + OBSTACLESPRITE.height + 20 > coins[0].y) {
 
         obstacles.splice(i,1);
         makeObstacle();
@@ -303,8 +303,6 @@ function makeObstacle() {
   // variables for each size obs
   var obs = {
     lifeLost: 1,
-    width: randomValue(20, 30),
-    height: randomValue(20, 30),
     x: pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
@@ -377,14 +375,13 @@ function draw() {
   // drawing the obstacles
   for (var i = 0; i < obstacles.length; i++) {
 
-    CTX.fillStyle = colours.obsColour;
-    CTX.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+    CTX.drawImage(OBSTACLESPRITE, 0, 0, OBSTACLESPRITE.width, OBSTACLESPRITE.height, obstacles[i].x, obstacles[i].y, OBSTACLESPRITE.width, OBSTACLESPRITE.height);
 
-    if (obstacles[0].x - obstacles[0].width < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
+    if (obstacles[0].x - OBSTACLESPRITE.width < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
       // making an obs when the frontmost obs is at the set distance
       makeObstacle();
 
-    } else if (obstacles[i].x < - obstacles[i].width){
+    } else if (obstacles[i].x < - OBSTACLESPRITE.width){
 
       // pop removes the last item in an array, which seeing as the obstacles are added to the front of the array, the pop will remove the leftmost obs.
       obstacles.pop();
@@ -401,6 +398,12 @@ function draw() {
   //drawing the ground
   CTX.fillStyle = colours.groundColour;
   CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
+  CTX.beginPath();
+  CTX.moveTo(0, FLOORHEIGHT);
+  CTX.lineTo(CVS.width, FLOORHEIGHT);
+  CTX.strokeStyle = "black";
+  CTX.lineWidth = 2;
+  CTX.stroke();
 
 
   // drawing the character
@@ -519,8 +522,7 @@ function died(){
   // drawing the obstacles
   for (var i = 0; i < obstacles.length; i++) {
 
-    CTX.fillStyle = colours.obsColour;
-    CTX.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+    CTX.drawImage(OBSTACLESPRITE, 0, 0, OBSTACLESPRITE.width, OBSTACLESPRITE.height, obstacles[i].x, obstacles[i].y, OBSTACLESPRITE.width, OBSTACLESPRITE.height);
 
   }
 
@@ -554,6 +556,12 @@ function died(){
   //drawing the ground
   CTX.fillStyle = colours.groundColour;
   CTX.fillRect(0, FLOORHEIGHT, CVS.width, CVS.height / 4);
+  CTX.beginPath();
+  CTX.moveTo(0, FLOORHEIGHT);
+  CTX.lineTo(CVS.width, FLOORHEIGHT);
+  CTX.strokeStyle = "black";
+  CTX.lineWidth = 2;
+  CTX.stroke();
 
   // drawing the character
   CTX.drawImage(CHARACTERSPRITE, character.sx, character.sy, character.sxd, character.syd, character.x, character.y, character.sxd * 1.8, character.syd * 1.8);
