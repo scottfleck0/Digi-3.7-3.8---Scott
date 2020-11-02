@@ -9,7 +9,7 @@ CTX.lineWidth = 2;
 // variable for if the game is running or not
 var game = {
   started: false,
-  running: false
+  running: false,
 };
 
 // function to get a random value
@@ -283,7 +283,7 @@ function makeFruit() {
   };
 
 
-  // unshift the selected fruit into the front of the fruits array
+  // put the selected fruit into the front of the fruits array
   if (fruitChoice >= 0 && fruitChoice < 1) {
 
     oneFruit.x = pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2;
@@ -305,13 +305,14 @@ function makeFruit() {
 // function to make a new obstacle
 function makeObstacle() {
 
-  // variables for each size obs
+  // variables for the obstacle
   var obs = {
     lifeLost: 1,
     x: pipes[0].x + PIPECONSTS.DISTANCEBETWEEN / 2,
     y: randomValue(FLOATCONSTS.MINY, FLOATCONSTS.MAXY)
   };
 
+  // putting the new obstacle into the obstacles array
   obstacles.unshift(obs);
 
 };
@@ -320,7 +321,7 @@ function makeObstacle() {
 
 function draw() {
 
-
+  // calling collision detection every time the draw funtion is called
   collisionDetection();
 
 
@@ -332,18 +333,22 @@ function draw() {
   // drawing pipes
   for (var i = 0; i < pipes.length; i++) {
 
+    // drawing top pipe
     CTX.drawImage(PIPESPRITE, 0, PIPESPRITE.height / 2, PIPESPRITE.width, PIPESPRITE.height / 2, pipes[i].x, pipes[i].topY - PIPESPRITE.height / 2 - PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
+    // drawing bottom pipe
     CTX.drawImage(PIPESPRITE, 0, 0, PIPESPRITE.width, PIPESPRITE.height/2, pipes[i].x, pipes[i].topY + PIPECONSTS.GAPHEIGHT, PIPESPRITE.width * 2, PIPESPRITE.height);
 
+    // if statement for if the first pipe is far enough along to create a new one
     if (pipes[0].x < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
 
       // making a pipe when the frontmost pipe is at the set distance
       makePipe();
 
+      // if statement for if any if the pipes have gone off the canvas
     } else if (pipes[i].x < - PIPESPRITE.WIDTH){
 
-      // pop removes the last item in an array, which seeing as the pipes are added to the front of the array, the pop will remove the leftmost pipe.
+      // pop to remove the leftmost pipe
       pipes.pop();
 
     } else {
@@ -354,11 +359,13 @@ function draw() {
     }
   }
 
-  // drawing the fruits
+  // for loop for drawing the fruits
   for (var i = 0; i < fruits.length; i++) {
 
+    // drawing the fruit
     CTX.drawImage(fruits[i].source, fruits[i].sx, fruits[i].sy, fruits[i].sxd, fruits[i].syd, fruits[i].x, fruits[i].y, fruits[i].sxd * 2, fruits[i].syd * 2);
 
+    // if the fruit is far enough along to create another one
     if (fruits[0].x - fruits[0].sxd < CVS.width - PIPECONSTS.DISTANCEBETWEEN) {
 
       // making a fruit when the frontmost fruit is at the set distance
@@ -366,7 +373,7 @@ function draw() {
 
     } else if (fruits[i].x < - PIPECONSTS.WIDTH){
 
-      // pop removes the last item in an array, which seeing as the fruits are added to the front of the array, the pop will remove the leftmost fruit.
+      // pop to remove the leftmost fruit
       fruits.pop();
 
     } else {
@@ -388,7 +395,7 @@ function draw() {
 
     } else if (obstacles[i].x < - OBSTACLESPRITE.width){
 
-      // pop removes the last item in an array, which seeing as the obstacles are added to the front of the array, the pop will remove the leftmost obs.
+      // pop to remove the leftmost obs
       obstacles.pop();
 
     } else {
@@ -495,19 +502,26 @@ function draw() {
   // checking lives to see if game needs to stop
   if(lives <= 0) {
 
-    scoreboard.push(score);
-    score = 0;
-    scoreboard.sort(function(a, b){return b - a});
+      var user = { // creating a user variable with name and score
+        name: window.prompt("What is your name?"),
+        score: score
+      };
 
-    if (scoreboard.length > 5){
+    scoreboard.push(user); // pushing the user variable into the scoreboard array
+    score = 0;
+    scoreboard.sort((a, b) => parseFloat(b.score) - parseFloat(a.score)); // sorting the scoreboard by the users score
+
+
+    if (scoreboard.length > 5){ // checking the length of the scoreboard and getting rid of the extra one if need be
 
       scoreboard.pop();
 
     }
 
-    game.running = false;
+      game.running = false; // stopping the game
 
-  }
+    }
+
 };
 
 
@@ -558,9 +572,9 @@ function died(){
 
     CTX.font = "20px Arial";
     CTX.strokeStyle = "black";
-    CTX.strokeText((i + 1) + ":   " + scoreboard[i],  CVS.width / 2, scoreboardYPos);
+    CTX.strokeText((i + 1) + ":   " + scoreboard[i].name + "  " + scoreboard[i].score,  CVS.width / 2, scoreboardYPos);
     CTX.fillStyle = "white";
-    CTX.fillText((i + 1) + ":   " + scoreboard[i],  CVS.width / 2, scoreboardYPos);
+    CTX.fillText((i + 1) + ":   " + scoreboard[i].name + "  " + scoreboard[i].score,  CVS.width / 2, scoreboardYPos);
     scoreboardYPos += 30;
 
   }
@@ -587,8 +601,10 @@ function died(){
 
 
   if (character.y + character.syd * 1.8 < FLOORHEIGHT) {
+
     character.yVelocity += GRAVITY; // gravity changing y velocity
     character.y += character.yVelocity; // y velocity changing the characters y
+
   }
 
 }
